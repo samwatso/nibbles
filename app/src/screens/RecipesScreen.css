@@ -1,0 +1,14 @@
+.recipes-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.recipes-controls {
+  margin-bottom: var(--space-lg);
+}
+
+.recipes-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
