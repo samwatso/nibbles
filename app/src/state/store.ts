@@ -77,7 +77,9 @@ export function getEffectiveTheme(theme: ThemeMode): 'light' | 'dark' {
 // Household State Management
 // ============================================
 
-const DEFAULT_HOUSEHOLD: HouseholdState = { mode: 'normal' };
+export type HouseholdMode = HouseholdState["mode"];
+
+const DEFAULT_HOUSEHOLD: HouseholdState = { mode: "normal" };
 
 export function getHouseholdState(): HouseholdState {
   return getStoredValue(STORAGE_KEYS.HOUSEHOLD, DEFAULT_HOUSEHOLD);
@@ -86,6 +88,7 @@ export function getHouseholdState(): HouseholdState {
 export function setHouseholdState(state: HouseholdState): void {
   setStoredValue(STORAGE_KEYS.HOUSEHOLD, state);
 }
+
 
 // ============================================
 // Inventory Management
