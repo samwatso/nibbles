@@ -6,7 +6,6 @@
 import type {
   InventoryItem,
   Location,
-  HouseholdState,
   AgeStatus,
   ShelfLifeRules,
 } from '../types';
@@ -77,7 +76,15 @@ export function getEffectiveTheme(theme: ThemeMode): 'light' | 'dark' {
 // Household State Management
 // ============================================
 
-export type HouseholdMode = HouseholdState["mode"];
+export type HouseholdMode = "normal" | "away";
+
+export type HouseholdState = {
+  mode: HouseholdMode;
+  away_start?: string;
+  away_end?: string;
+  away_label?: string;
+};
+
 
 const DEFAULT_HOUSEHOLD: HouseholdState = { mode: "normal" };
 
