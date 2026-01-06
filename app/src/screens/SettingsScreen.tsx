@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { SegmentedControl, type Segment } from '../components/SegmentedControl';
-import { getTheme, setTheme, type ThemeMode, getHouseholdState, setHouseholdState } from '../state/store';
+import { getTheme, setTheme, type ThemeMode, getHouseholdState, setHouseholdState, type HouseholdMode } from '../state/store';
 import './SettingsScreen.css';
-
-type HouseholdMode = 'normal' | 'away';
 
 const themeSegments: Segment<ThemeMode>[] = [
   { value: 'system', label: 'System' },
