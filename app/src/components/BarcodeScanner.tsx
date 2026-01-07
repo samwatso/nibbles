@@ -77,6 +77,22 @@ export function BarcodeScanner({ onComplete, onCancel }: BarcodeScannerProps) {
               // stop camera immediately so it doesn’t fire twice
               stopCamera();
 
+              let label = `Scanned item (${code})`;
+              const res = await fetch(`/api/off?barcode=${encodeURIComponent(code)}`);
+              const data = await res.json();
+
+              if (data?.ok) {
+                label = [data.product?.brand, data.product?.name].filter(Boolean).join(" — ") || label;
+              }
+
+              setScannedProduct({
+                barcode: code,
+                name: label,
+                category: "other",
+                suggestedLocation: "pantry",
+              });
+              setState("confirm");
+
               // set a quick placeholder so UI responds instantly
               setScannedProduct({
                 barcode: code,
