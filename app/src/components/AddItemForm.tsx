@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Location, Category, StockStatus } from '../types';
 import { LOCATION_LABELS, CATEGORY_LABELS, STOCK_STATUS_LABELS } from '../types';
 import './AddItemForm.css';
@@ -36,6 +36,37 @@ export function AddItemForm({
   const [stockStatus, setStockStatus] = useState<StockStatus>(
     initialValues?.stock_status ?? 'in_stock'
   );
+  const [nameTouched, setNameTouched] = useState(false);
+  const [locationTouched, setLocationTouched] = useState(false);
+  const [categoryTouched, setCategoryTouched] = useState(false);
+  const [stockTouched, setStockTouched] = useState(false);
+
+  useEffect(() => {
+    if (!initialValues) return;
+
+    if (!nameTouched && initialValues.name !== undefined) {
+      setName(initialValues.name ?? '');
+    }
+    if (!locationTouched && initialValues.location !== undefined) {
+      setLocation(initialValues.location ?? 'fridge');
+    }
+    if (!categoryTouched && initialValues.category !== undefined) {
+      setCategory(initialValues.category ?? 'fresh');
+    }
+    if (!stockTouched && initialValues.stock_status !== undefined) {
+      setStockStatus(initialValues.stock_status ?? 'in_stock');
+    }
+  }, [
+    initialValues?.name,
+    initialValues?.location,
+    initialValues?.category,
+    initialValues?.stock_status,
+    nameTouched,
+    locationTouched,
+    categoryTouched,
+    stockTouched,
+  ]);
+
 
   const isValid = name.trim().length > 0;
 
@@ -63,7 +94,11 @@ export function AddItemForm({
           type="text"
           className="form-input"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setNameTouched(true);
+            setName(e.target.value);
+          }}
+
           placeholder="e.g. Chicken breast"
           autoFocus
           autoComplete="off"
@@ -80,7 +115,10 @@ export function AddItemForm({
             id="item-location"
             className="form-select"
             value={location}
-            onChange={(e) => setLocation(e.target.value as Location)}
+            onChange={(e) => {
+              setLocationTouched(true);
+              setLocation(e.target.value as Location);
+            }}
           >
             {LOCATIONS.map((loc) => (
               <option key={loc} value={loc}>
@@ -106,7 +144,7 @@ export function AddItemForm({
             id="item-category"
             className="form-select"
             value={category}
-            onChange={(e) => setCategory(e.target.value as Category)}
+            onChange={(e) => { setCategoryTouched(true); setCategory(e.target.value as Category); }}
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
@@ -133,7 +171,7 @@ export function AddItemForm({
             id="item-stock"
             className="form-select"
             value={stockStatus}
-            onChange={(e) => setStockStatus(e.target.value as StockStatus)}
+            onChange={(e) => { setStockTouched(true); setStockStatus(e.target.value as StockStatus); }}
           >
             {STOCK_STATUSES.map((status) => (
               <option key={status} value={status}>
