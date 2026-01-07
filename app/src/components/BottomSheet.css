@@ -77,4 +77,5 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: var(--space-md);
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
 }

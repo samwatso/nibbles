@@ -1,3 +1,7 @@
+:root {
+  --tabbar-h: 72px;
+}
+
 .tab-bar {
   position: fixed;
   bottom: 0;
