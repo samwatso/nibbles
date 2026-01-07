@@ -74,21 +74,36 @@ export function BarcodeScanner({ onComplete, onCancel }: BarcodeScannerProps) {
             if (result) {
               const code = result.getText();
 
-              // stop immediately to avoid double-fires
+              // stop camera immediately so it doesn’t fire twice
               stopCamera();
 
-              // Minimal “product” mapping for now:
-              // If you add /api/off later, you can swap this to a lookup.
-              const product: ScannedProduct = {
+              // set a quick placeholder so UI responds instantly
+              setScannedProduct({
                 barcode: code,
                 name: `Scanned item (${code})`,
                 category: "other",
                 suggestedLocation: "pantry",
-              };
-
-              setScannedProduct(product);
+              });
               setState("confirm");
-              return;
+
+              // then look up Open Food Facts via your Pages Function and replace the name
+              void (async () => {
+                try {
+                  const res = await fetch(`/api/off?barcode=${encodeURIComponent(code)}`);
+                  const data = await res.json();
+
+                  const offName = data?.product?.name;
+                  if (data?.ok && typeof offName === "string" && offName.trim()) {
+                    setScannedProduct((prev) =>
+                      prev && prev.barcode === code
+                        ? { ...prev, name: offName.trim() }
+                        : prev
+                    );
+                  }
+                } catch {
+                  // ignore; user can still edit the name manually
+                }
+              })();
             }
 
             // NotFoundException is normal (no barcode found in the frame yet)
