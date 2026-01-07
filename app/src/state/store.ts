@@ -271,11 +271,4 @@ export function initializeStore(): void {
   // Apply theme
   const theme = getTheme();
   applyTheme(theme);
-
-  // Seed inventory if first run
-  const initialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
-  if (!initialized) {
-    setInventory(SEED_INVENTORY);
-    localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
-  }
 }
