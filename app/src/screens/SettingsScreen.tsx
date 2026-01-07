@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import type { ThemeMode, HouseholdMode, HouseholdState } from '../types';
 import { SegmentedControl, type Segment } from '../components/SegmentedControl';
-import { getTheme, setTheme, type ThemeMode, getHouseholdState, setHouseholdState, type HouseholdMode } from '../state/store';
+import { getTheme, setTheme, getHouseholdState, setHouseholdState, resetToSeedData } from '../state/store';
 import './SettingsScreen.css';
 
 const themeSegments: Segment<ThemeMode>[] = [
@@ -14,18 +15,74 @@ const householdSegments: Segment<HouseholdMode>[] = [
   { value: 'away', label: 'Away' },
 ];
 
+function formatDateForInput(isoDate?: string): string {
+  if (!isoDate) return '';
+  return isoDate.split('T')[0];
+}
+
+function formatDateForDisplay(isoDate?: string): string {
+  if (!isoDate) return '';
+  try {
+    return new Date(isoDate).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return '';
+  }
+}
+
 export function SettingsScreen() {
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>(getTheme);
-  const [householdMode, setHouseholdMode] = useState<HouseholdMode>(() => getHouseholdState().mode);
+  const [household, setHousehold] = useState<HouseholdState>(getHouseholdState);
 
   useEffect(() => {
     setTheme(currentTheme);
   }, [currentTheme]);
 
-  const handleHouseholdChange = (mode: HouseholdMode) => {
-    setHouseholdMode(mode);
-    setHouseholdState({ ...getHouseholdState(), mode });
+  const handleHouseholdModeChange = (mode: HouseholdMode) => {
+    const updated: HouseholdState = {
+      ...household,
+      mode,
+      // Clear dates when switching to normal
+      ...(mode === 'normal' && {
+        away_start: undefined,
+        away_end: undefined,
+        away_label: undefined,
+      }),
+    };
+    setHousehold(updated);
+    setHouseholdState(updated);
   };
+
+  const handleAwayLabelChange = (label: string) => {
+    const updated = { ...household, away_label: label || undefined };
+    setHousehold(updated);
+    setHouseholdState(updated);
+  };
+
+  const handleAwayStartChange = (date: string) => {
+    const updated = { ...household, away_start: date ? `${date}T00:00:00.000Z` : undefined };
+    setHousehold(updated);
+    setHouseholdState(updated);
+  };
+
+  const handleAwayEndChange = (date: string) => {
+    const updated = { ...household, away_end: date ? `${date}T23:59:59.999Z` : undefined };
+    setHousehold(updated);
+    setHouseholdState(updated);
+  };
+
+  const handleResetData = () => {
+    if (window.confirm('Reset inventory to sample data? This cannot be undone.')) {
+      resetToSeedData();
+      window.location.reload();
+    }
+  };
+
+  const awayDateDisplay = household.away_start || household.away_end
+    ? `${formatDateForDisplay(household.away_start) || '?'} – ${formatDateForDisplay(household.away_end) || '?'}`
+    : null;
 
   return (
     <div className="screen settings-screen">
@@ -64,14 +121,66 @@ export function SettingsScreen() {
               </div>
               <SegmentedControl
                 segments={householdSegments}
-                value={householdMode}
-                onChange={handleHouseholdChange}
+                value={household.mode}
+                onChange={handleHouseholdModeChange}
                 ariaLabel="Household mode"
               />
             </div>
-            {householdMode === 'away' && (
-              <div className="settings-hint">
-                Away mode pauses meal logging and treats skipped recipes as neutral.
+
+            {household.mode === 'away' && (
+              <div className="away-options">
+                <div className="away-field">
+                  <label className="away-field-label" htmlFor="away-label">
+                    Label (optional)
+                  </label>
+                  <input
+                    id="away-label"
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. Holiday, Work trip"
+                    value={household.away_label || ''}
+                    onChange={(e) => handleAwayLabelChange(e.target.value)}
+                  />
+                </div>
+
+                <div className="away-dates">
+                  <div className="away-field">
+                    <label className="away-field-label" htmlFor="away-start">
+                      From
+                    </label>
+                    <input
+                      id="away-start"
+                      type="date"
+                      className="form-input"
+                      value={formatDateForInput(household.away_start)}
+                      onChange={(e) => handleAwayStartChange(e.target.value)}
+                    />
+                  </div>
+                  <div className="away-field">
+                    <label className="away-field-label" htmlFor="away-end">
+                      To
+                    </label>
+                    <input
+                      id="away-end"
+                      type="date"
+                      className="form-input"
+                      value={formatDateForInput(household.away_end)}
+                      onChange={(e) => handleAwayEndChange(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="away-summary">
+                  <span className="away-summary-icon">🏖️</span>
+                  <span className="away-summary-text">
+                    {household.away_label || 'Away'}
+                    {awayDateDisplay && <span className="away-summary-dates"> · {awayDateDisplay}</span>}
+                  </span>
+                </div>
+
+                <div className="settings-hint">
+                  Away mode shows a banner in Recipes and skipped recipes won't count as negative outcomes.
+                </div>
               </div>
             )}
           </div>
@@ -85,6 +194,25 @@ export function SettingsScreen() {
               <span className="empty-state-text">
                 Staples list coming soon — items you always have on hand.
               </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Data section */}
+        <section className="settings-section">
+          <h2 className="settings-section-title">Data</h2>
+          <div className="settings-card glass-surface">
+            <div className="settings-row settings-row--vertical">
+              <div className="settings-row-label">
+                <span className="settings-row-icon">🔄</span>
+                <span>Reset inventory</span>
+              </div>
+              <p className="settings-row-description">
+                Replace your inventory with sample data for testing.
+              </p>
+              <button className="btn btn--danger btn--small" onClick={handleResetData}>
+                Reset to sample data
+              </button>
             </div>
           </div>
         </section>

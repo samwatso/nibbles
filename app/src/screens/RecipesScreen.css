@@ -1,14 +1,71 @@
 .recipes-screen {
   display: flex;
   flex-direction: column;
+  gap: var(--space-md);
+}
+
+.away-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(212, 161, 84, 0.12);
+  border: 1px solid rgba(212, 161, 84, 0.3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-warning);
 }
 
 .recipes-controls {
-  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
-.recipes-content {
-  flex: 1;
+.filters-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  position: relative;
+  margin-left: auto;
+}
+
+.filters-toggle:hover {
+  border-color: var(--color-border-strong);
+}
+
+.filters-toggle--active {
+  background: rgba(196, 119, 92, 0.1);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.filters-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-bg-primary);
+}
+
+.recipes-list {
   display: flex;
   flex-direction: column;
+  gap: var(--space-md);
+  flex: 1;
+}
+
+.recipes-screen .empty-state {
+  margin-top: var(--space-xl);
 }

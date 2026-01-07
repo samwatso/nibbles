@@ -9,6 +9,10 @@ import type {
   HouseholdState,
   AgeStatus,
   ShelfLifeRules,
+  RecipeInteraction,
+  RecipeSubstitution,
+  Leftovers,
+  ShopSize,
 } from '../types';
 import { DEFAULT_SHELF_LIFE_RULES } from '../types';
 import { SEED_INVENTORY } from '../data/mockData';
@@ -21,6 +25,8 @@ const STORAGE_KEYS = {
   THEME: 'nibbles_theme',
   HOUSEHOLD: 'nibbles_household',
   INVENTORY: 'nibbles_inventory',
+  INTERACTIONS: 'nibbles_interactions',
+  SUBSTITUTIONS: 'nibbles_substitutions',
   INITIALIZED: 'nibbles_initialized',
 } as const;
 
@@ -213,6 +219,69 @@ export function getDaysOld(item: InventoryItem): number {
   const addedDate = new Date(item.added_at);
   const now = new Date();
   return Math.floor((now.getTime() - addedDate.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+// ============================================
+// Recipe Interactions
+// ============================================
+
+export function getRecipeInteractions(): RecipeInteraction[] {
+  return getStoredValue(STORAGE_KEYS.INTERACTIONS, []);
+}
+
+export function setRecipeInteractions(interactions: RecipeInteraction[]): void {
+  setStoredValue(STORAGE_KEYS.INTERACTIONS, interactions);
+}
+
+export function addRecipeInteraction(
+  interaction: Omit<RecipeInteraction, 'id' | 'created_at'>
+): RecipeInteraction {
+  const newInteraction: RecipeInteraction = {
+    ...interaction,
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+  };
+
+  const interactions = getRecipeInteractions();
+  interactions.push(newInteraction);
+  setRecipeInteractions(interactions);
+
+  return newInteraction;
+}
+
+export function getInteractionsForRecipe(recipeId: string): RecipeInteraction[] {
+  return getRecipeInteractions().filter((i) => i.recipe_id === recipeId);
+}
+
+// ============================================
+// Recipe Substitutions
+// ============================================
+
+export function getRecipeSubstitutions(): RecipeSubstitution[] {
+  return getStoredValue(STORAGE_KEYS.SUBSTITUTIONS, []);
+}
+
+export function setRecipeSubstitutions(subs: RecipeSubstitution[]): void {
+  setStoredValue(STORAGE_KEYS.SUBSTITUTIONS, subs);
+}
+
+export function addRecipeSubstitution(
+  sub: Omit<RecipeSubstitution, 'id'>
+): RecipeSubstitution {
+  const newSub: RecipeSubstitution = {
+    ...sub,
+    id: crypto.randomUUID(),
+  };
+
+  const subs = getRecipeSubstitutions();
+  subs.push(newSub);
+  setRecipeSubstitutions(subs);
+
+  return newSub;
+}
+
+export function getSubstitutionsForInteraction(interactionId: string): RecipeSubstitution[] {
+  return getRecipeSubstitutions().filter((s) => s.interaction_id === interactionId);
 }
 
 // ============================================

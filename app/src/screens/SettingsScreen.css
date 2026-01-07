@@ -38,11 +38,16 @@
 }
 
 @media (min-width: 400px) {
-  .settings-row {
+  .settings-row:not(.settings-row--vertical) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
+}
+
+.settings-row--vertical {
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .settings-row-label {
@@ -58,13 +63,73 @@
   font-size: 18px;
 }
 
+.settings-row-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
 .settings-hint {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
-  padding: var(--space-sm) 0;
+  padding: var(--space-sm) 0 0;
   border-top: 1px solid var(--color-border);
 }
 
+/* Away mode options */
+.away-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.away-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.away-field-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.away-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.away-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(212, 161, 84, 0.12);
+  border-radius: var(--radius-md);
+}
+
+.away-summary-icon {
+  font-size: 18px;
+}
+
+.away-summary-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-warning);
+}
+
+.away-summary-dates {
+  font-weight: var(--font-weight-normal);
+  opacity: 0.8;
+}
+
+/* Empty state */
 .empty-state-inline {
   display: flex;
   align-items: center;
@@ -73,4 +138,20 @@
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
   text-align: center;
+}
+
+/* Button variants */
+.btn--small {
+  height: 36px;
+  padding: 0 var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.btn--danger {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+.btn--danger:hover {
+  background: #b54f4f;
 }

@@ -1,0 +1,247 @@
+.cooked-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.cooked-recipe-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.cooked-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.cooked-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.cooked-label .required {
+  color: var(--color-danger);
+}
+
+.cooked-toggle-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.cooked-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--color-bg-tertiary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.cooked-toggle:hover {
+  border-color: var(--color-border-strong);
+}
+
+.cooked-toggle--active {
+  background: rgba(196, 119, 92, 0.1);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.cooked-rating {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.rating-star {
+  font-size: 28px;
+  color: var(--color-border-strong);
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  padding: var(--space-xs);
+}
+
+.rating-star:hover {
+  transform: scale(1.1);
+}
+
+.rating-star--filled {
+  color: var(--color-warning);
+}
+
+.cooked-options {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.cooked-option {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.cooked-option:hover {
+  border-color: var(--color-border-strong);
+}
+
+.cooked-option--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-white);
+}
+
+.cooked-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.cooked-tag {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.cooked-tag:hover {
+  border-color: var(--color-border-strong);
+}
+
+.cooked-tag--active {
+  background: rgba(196, 119, 92, 0.15);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.substitution-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.substitution-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.substitution-text {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.substitution-worked {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.substitution-worked--yes {
+  background: rgba(74, 158, 109, 0.15);
+  color: var(--color-success);
+}
+
+.substitution-worked--no {
+  background: rgba(199, 92, 92, 0.15);
+  color: var(--color-danger);
+}
+
+.substitution-remove {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.substitution-remove:hover {
+  background: rgba(199, 92, 92, 0.15);
+  color: var(--color-danger);
+}
+
+.substitution-add {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.substitution-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 var(--space-sm);
+  font-size: var(--font-size-sm);
+}
+
+.substitution-arrow {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.substitution-add-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast);
+}
+
+.substitution-add-btn:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.substitution-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cooked-actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.cooked-actions .btn {
+  flex: 1;
+}
