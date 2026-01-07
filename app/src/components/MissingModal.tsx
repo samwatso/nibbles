@@ -1,5 +1,5 @@
 import { LOCATION_LABELS, LOCATION_ICONS, type Location } from '../types';
-import { groupMissingByLocation, type MissingByLocation } from '../utils/recipeMatching';
+import { groupMissingByLocation } from '../utils/recipeMatching';
 import './MissingModal.css';
 
 interface MissingModalProps {

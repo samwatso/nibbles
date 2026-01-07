@@ -11,8 +11,6 @@ import type {
   ShelfLifeRules,
   RecipeInteraction,
   RecipeSubstitution,
-  Leftovers,
-  ShopSize,
 } from '../types';
 import { DEFAULT_SHELF_LIFE_RULES } from '../types';
 import { SEED_INVENTORY } from '../data/mockData';
