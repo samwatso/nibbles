@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { Recipe, RecipeSource, RecipeInteraction, RecipeSubstitution } from '../types';
+import type { Recipe, RecipeSource, RecipeInteraction, RecipeSubstitution, InventoryItem } from '../types';
 import { SegmentedControl, type Segment } from '../components/SegmentedControl';
 import { RecipeFilters } from '../components/RecipeFilters';
 import { RecipeCard } from '../components/RecipeCard';
 import { MissingModal } from '../components/MissingModal';
 import { CookedSheet } from '../components/CookedSheet';
 import { SEED_RECIPES } from '../data/recipeData';
-import { getInventory, getHouseholdState } from '../state/store';
+import { getHouseholdState } from '../state/store';
+import { fetchInventory } from '../api/inventory';
 import {
   calculateAllRecipeMatches,
   sortByBestMatch,
@@ -58,16 +59,30 @@ export function RecipesScreen() {
   const [protein, setProtein] = useState<RecipeFiltersType['protein']>('any');
   const [searchTerm, setSearchTerm] = useState('');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  
+
   const [missingModal, setMissingModal] = useState<{ title: string; missing: string[] } | null>(null);
   const [cookedRecipe, setCookedRecipe] = useState<Recipe | null>(null);
-  
-  const [inventory, setInventory] = useState(getInventory());
+
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [isLoadingInventory, setIsLoadingInventory] = useState(true);
   const householdState = getHouseholdState();
   const isAway = householdState.mode === 'away';
 
   useEffect(() => {
-    setInventory(getInventory());
+    const loadInventory = async () => {
+      setIsLoadingInventory(true);
+      try {
+        const items = await fetchInventory();
+        setInventory(items);
+      } catch (err) {
+        console.error('Failed to load inventory for recipes:', err);
+        setInventory([]);
+      } finally {
+        setIsLoadingInventory(false);
+      }
+    };
+
+    loadInventory();
   }, []);
 
   const handleSourceToggle = useCallback((source: RecipeSource) => {
@@ -90,11 +105,11 @@ export function RecipesScreen() {
   const filteredMatches = useMemo(() => {
     const filters: RecipeFiltersType = { sources, protein, searchTerm };
     let results = filterRecipes(allMatches, filters);
-    
+
     if (mode === 'best') {
       results = sortByBestMatch(results);
     }
-    
+
     return results;
   }, [allMatches, sources, protein, searchTerm, mode]);
 
@@ -119,9 +134,9 @@ export function RecipesScreen() {
       id: interactionId,
       created_at: new Date().toISOString(),
     };
-    
+
     saveInteraction(fullInteraction);
-    
+
     if (substitutions.length > 0) {
       const fullSubs: RecipeSubstitution[] = substitutions.map((sub) => ({
         ...sub,
@@ -130,7 +145,7 @@ export function RecipesScreen() {
       }));
       saveSubstitutions(fullSubs);
     }
-    
+
     setCookedRecipe(null);
   };
 
@@ -154,7 +169,7 @@ export function RecipesScreen() {
           onChange={setMode}
           ariaLabel="Recipe view mode"
         />
-        
+
         <button
           className={`filters-toggle ${filtersExpanded ? 'filters-toggle--active' : ''}`}
           onClick={() => setFiltersExpanded(!filtersExpanded)}
@@ -181,7 +196,15 @@ export function RecipesScreen() {
       )}
 
       <div className="recipes-list">
-        {filteredMatches.length === 0 ? (
+        {isLoadingInventory ? (
+          <div className="empty-state">
+            <span className="empty-state-icon">⏳</span>
+            <span className="empty-state-title">Loading inventory...</span>
+            <span className="empty-state-text">
+              Checking what ingredients you have
+            </span>
+          </div>
+        ) : filteredMatches.length === 0 ? (
           <div className="empty-state">
             <span className="empty-state-icon">🍳</span>
             <span className="empty-state-title">No recipes found</span>

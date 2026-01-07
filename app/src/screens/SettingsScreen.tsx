@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { ThemeMode, HouseholdMode, HouseholdState } from '../types';
 import { SegmentedControl, type Segment } from '../components/SegmentedControl';
-import { getTheme, setTheme, getHouseholdState, setHouseholdState, resetToSeedData } from '../state/store';
+import { getTheme, setTheme, getHouseholdState, setHouseholdState } from '../state/store';
 import './SettingsScreen.css';
 
 const themeSegments: Segment<ThemeMode>[] = [
@@ -71,13 +71,6 @@ export function SettingsScreen() {
     const updated = { ...household, away_end: date ? `${date}T23:59:59.999Z` : undefined };
     setHousehold(updated);
     setHouseholdState(updated);
-  };
-
-  const handleResetData = () => {
-    if (window.confirm('Reset inventory to sample data? This cannot be undone.')) {
-      resetToSeedData();
-      window.location.reload();
-    }
   };
 
   const awayDateDisplay = household.away_start || household.away_end
@@ -197,25 +190,7 @@ export function SettingsScreen() {
             </div>
           </div>
         </section>
-
-        {/* Data section */}
-        <section className="settings-section">
-          <h2 className="settings-section-title">Data</h2>
-          <div className="settings-card glass-surface">
-            <div className="settings-row settings-row--vertical">
-              <div className="settings-row-label">
-                <span className="settings-row-icon">🔄</span>
-                <span>Reset inventory</span>
-              </div>
-              <p className="settings-row-description">
-                Replace your inventory with sample data for testing.
-              </p>
-              <button className="btn btn--danger btn--small" onClick={handleResetData}>
-                Reset to sample data
-              </button>
-            </div>
-          </div>
-        </section>
+        
       </div>
     </div>
   );

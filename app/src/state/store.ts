@@ -13,7 +13,6 @@ import type {
   RecipeSubstitution,
 } from '../types';
 import { DEFAULT_SHELF_LIFE_RULES } from '../types';
-import { SEED_INVENTORY } from '../data/mockData';
 
 // Theme
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -279,9 +278,4 @@ export function initializeStore(): void {
     setInventory(SEED_INVENTORY);
     localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
   }
-}
-
-// Reset to seed data (for testing)
-export function resetToSeedData(): void {
-  setInventory(SEED_INVENTORY);
 }
