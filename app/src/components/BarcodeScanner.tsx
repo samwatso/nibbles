@@ -109,8 +109,8 @@ export function BarcodeScanner({ onComplete, onCancel }: BarcodeScannerProps) {
     return () => {
       cancelled = true;
       stopCamera();
-      reader.reset();
     };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
