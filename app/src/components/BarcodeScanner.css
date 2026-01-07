@@ -124,3 +124,18 @@
   font-weight: var(--font-weight-medium);
   align-self: flex-start;
 }
+
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ensure overlays sit above the video */
+.scanner-frame,
+.scanner-hint {
+  position: relative;
+  z-index: 1;
+}
