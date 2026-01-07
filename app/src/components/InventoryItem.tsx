@@ -8,6 +8,7 @@ interface InventoryItemProps {
   isSelectMode: boolean;
   isSelected: boolean;
   onSelect: (id: string) => void;
+  onEdit?: (item: InventoryItemType) => void;
 }
 
 const AgeIcon = ({ status }: { status: AgeStatus }) => {
@@ -45,17 +46,21 @@ export function InventoryItemRow({
   isSelectMode,
   isSelected,
   onSelect,
+  onEdit,
 }: InventoryItemProps) {
   const ageStatus = calculateAgeStatus(item);
 
+  const isEditable = !isSelectMode && typeof onEdit === "function";
+  const isInteractive = isSelectMode || isEditable;
+
   const handleClick = () => {
-    if (isSelectMode) {
-      onSelect(item.id);
-    }
+    if (isSelectMode) onSelect(item.id);
+    else if (isEditable) onEdit(item);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (!isInteractive) return;
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleClick();
     }
@@ -63,15 +68,20 @@ export function InventoryItemRow({
 
   return (
     <div
-      className={`inventory-item ${isSelectMode ? 'inventory-item--selectable' : ''} ${isSelected ? 'inventory-item--selected' : ''}`}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      role={isSelectMode ? 'checkbox' : undefined}
+      className={[
+        "inventory-item",
+        isSelectMode ? "inventory-item--selectable" : "",
+        isEditable ? "inventory-item--editable" : "",
+        isSelected ? "inventory-item--selected" : "",
+      ].join(" ")}
+      onClick={isInteractive ? handleClick : undefined}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
+      role={isSelectMode ? "checkbox" : isEditable ? "button" : undefined}
       aria-checked={isSelectMode ? isSelected : undefined}
-      tabIndex={isSelectMode ? 0 : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
     >
       {isSelectMode && (
-        <span className={`inventory-item-checkbox ${isSelected ? 'inventory-item-checkbox--checked' : ''}`}>
+        <span className={`inventory-item-checkbox ${isSelected ? "inventory-item-checkbox--checked" : ""}`}>
           {isSelected && (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />

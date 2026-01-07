@@ -9,17 +9,6 @@ type PatchBody = Partial<{
   stock_status: StockStatus;
 }>;
 
-export const onRequestDelete: PagesFunction<{ NIBBLES_DB: D1Database }> = async ({ env, params }) => {
-  const id = String(params.id || "").trim();
-  if (!id) return json({ ok: false, error: "Missing id" }, 400);
-
-  await env.NIBBLES_DB.prepare("DELETE FROM inventory_items WHERE id = ?")
-    .bind(id)
-    .run();
-
-  return json({ ok: true });
-};
-
 export const onRequestPatch: PagesFunction<{ NIBBLES_DB: D1Database }> = async ({ env, params, request }) => {
   const id = String(params.id || "").trim();
   if (!id) return json({ ok: false, error: "Missing id" }, 400);
@@ -54,9 +43,7 @@ export const onRequestPatch: PagesFunction<{ NIBBLES_DB: D1Database }> = async (
     binds.push(body.stock_status);
   }
 
-  if (updates.length === 0) {
-    return json({ ok: false, error: "No valid fields to update" }, 400);
-  }
+  if (updates.length === 0) return json({ ok: false, error: "No valid fields to update" }, 400);
 
   const now = new Date().toISOString();
   updates.push("updated_at = ?");
@@ -70,11 +57,7 @@ export const onRequestPatch: PagesFunction<{ NIBBLES_DB: D1Database }> = async (
     .run();
 
   const item = await env.NIBBLES_DB
-    .prepare(
-      `SELECT id, name, location, category, stock_status, added_at, updated_at
-       FROM inventory_items
-       WHERE id = ?`
-    )
+    .prepare(`SELECT id, name, location, category, stock_status, added_at, updated_at FROM inventory_items WHERE id = ?`)
     .bind(id)
     .first();
 

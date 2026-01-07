@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import type { InventoryItem, Location } from '../types';
 import { LOCATION_LABELS, LOCATION_ICONS } from '../types';
 import {
-  deleteInventoryItems,
-  moveInventoryItems,
-  markInventoryItemsOutOfStock,
-} from '../state/store';
-import { fetchInventory, createInventoryItem } from '../api/inventory';
+  fetchInventory,
+  createInventoryItem,
+  bulkDeleteInventoryItems,
+  bulkMoveInventoryItems,
+  bulkMarkInventoryItemsOutOfStock,
+} from '../api/inventory';
 import { BottomSheet } from '../components/BottomSheet';
 import { InventoryItemRow } from '../components/InventoryItem';
 import { AddItemForm } from '../components/AddItemForm';
@@ -31,6 +32,8 @@ export function InventoryScreen() {
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [addMode, setAddMode] = useState<AddMode>('choose');
   const [moveTarget, setMoveTarget] = useState<MoveTarget>(null);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+
 
   // Load inventory from API
   const refreshInventory = useCallback(async () => {
@@ -96,26 +99,51 @@ export function InventoryScreen() {
   };
 
   // Bulk actions
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedIds.size === 0) return;
-    deleteInventoryItems(Array.from(selectedIds));
-    refreshInventory();
-    exitSelectMode();
+
+    try {
+      await bulkDeleteInventoryItems(Array.from(selectedIds));
+      await refreshInventory();
+      exitSelectMode();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete items');
+    }
   };
 
-  const handleMove = (location: Location) => {
+  const handleMove = async (location: Location) => {
     if (selectedIds.size === 0) return;
-    moveInventoryItems(Array.from(selectedIds), location);
-    refreshInventory();
-    exitSelectMode();
+
+    try {
+      await bulkMoveInventoryItems(Array.from(selectedIds), location);
+      await refreshInventory();
+      exitSelectMode();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to move items');
+    }
   };
 
-  const handleMarkOutOfStock = () => {
+  const handleMarkOutOfStock = async () => {
     if (selectedIds.size === 0) return;
-    markInventoryItemsOutOfStock(Array.from(selectedIds));
-    refreshInventory();
-    exitSelectMode();
+
+    try {
+      await bulkMarkInventoryItemsOutOfStock(Array.from(selectedIds));
+      await refreshInventory();
+      exitSelectMode();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update items');
+    }
   };
+
+  const openEditSheet = (item: InventoryItem) => {
+    if (isSelectMode) return;
+    setEditingItem(item);
+  };
+
+  const closeEditSheet = () => {
+    setEditingItem(null);
+  };
+
 
   // Add item handlers
   const openAddSheet = () => {
@@ -286,6 +314,7 @@ export function InventoryScreen() {
                         isSelectMode={isSelectMode}
                         isSelected={selectedIds.has(item.id)}
                         onSelect={handleToggleSelect}
+                        onEdit={openEditSheet}
                       />
                     ))}
                   </div>
@@ -364,6 +393,28 @@ export function InventoryScreen() {
           />
         )}
       </BottomSheet>
+      <BottomSheet
+        isOpen={!!editingItem}
+        onClose={closeEditSheet}
+        title="Edit item"
+      >
+        {editingItem && (
+          <AddItemForm
+            initialValues={{
+              name: editingItem.name,
+              location: editingItem.location,
+              category: editingItem.category,
+              stock_status: editingItem.stock_status,
+            }}
+            submitLabel="Save changes"
+            onSubmit={async (values) => {
+              // call PATCH here (updateInventoryItem)
+            }}
+            onCancel={closeEditSheet}
+          />
+        )}
+      </BottomSheet>
+
     </div>
   );
 }

@@ -29,6 +29,19 @@
   background: rgba(196, 119, 92, 0.12);
 }
 
+.inventory-item--editable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.inventory-item--editable:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.inventory-item--editable:active {
+  background: rgba(196, 119, 92, 0.08);
+}
+
 .inventory-item-checkbox {
   width: 22px;
   height: 22px;
