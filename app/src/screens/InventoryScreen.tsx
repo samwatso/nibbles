@@ -2,12 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import type { InventoryItem, Location } from '../types';
 import { LOCATION_LABELS, LOCATION_ICONS } from '../types';
 import {
-  getInventoryByLocation,
-  addInventoryItem,
   deleteInventoryItems,
   moveInventoryItems,
   markInventoryItemsOutOfStock,
 } from '../state/store';
+import { fetchInventory, createInventoryItem } from '../api/inventory';
 import { BottomSheet } from '../components/BottomSheet';
 import { InventoryItemRow } from '../components/InventoryItem';
 import { AddItemForm } from '../components/AddItemForm';
@@ -25,15 +24,41 @@ export function InventoryScreen() {
     freezer: [],
     pantry: [],
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [addMode, setAddMode] = useState<AddMode>('choose');
   const [moveTarget, setMoveTarget] = useState<MoveTarget>(null);
 
-  // Load inventory
-  const refreshInventory = useCallback(() => {
-    setInventory(getInventoryByLocation());
+  // Load inventory from API
+  const refreshInventory = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const items = await fetchInventory();
+
+      // Group by location
+      const grouped: Record<Location, InventoryItem[]> = {
+        fridge: [],
+        freezer: [],
+        pantry: [],
+      };
+
+      for (const item of items) {
+        if (grouped[item.location]) {
+          grouped[item.location].push(item);
+        }
+      }
+
+      setInventory(grouped);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load inventory');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -103,15 +128,25 @@ export function InventoryScreen() {
     setAddMode('choose');
   };
 
-  const handleAddItem = (item: {
+  const handleAddItem = async (item: {
     name: string;
     location: Location;
     category: InventoryItem['category'];
     stock_status: InventoryItem['stock_status'];
   }) => {
-    addInventoryItem(item);
-    refreshInventory();
-    closeAddSheet();
+    try {
+      const newItem = await createInventoryItem(item);
+
+      // Update UI immediately with the new item
+      setInventory((prev) => ({
+        ...prev,
+        [newItem.location]: [...prev[newItem.location], newItem],
+      }));
+
+      closeAddSheet();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to add item');
+    }
   };
 
   const totalItems = Object.values(inventory).flat().length;
@@ -204,41 +239,62 @@ export function InventoryScreen() {
         )}
       </header>
 
+      {/* Loading state */}
+      {isLoading && (
+        <div className="inventory-loading">
+          <div className="loading-skeleton" />
+          <div className="loading-skeleton" />
+          <div className="loading-skeleton" />
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && !isLoading && (
+        <div className="inventory-error">
+          <span className="inventory-error-text">{error}</span>
+          <button className="inventory-error-retry" onClick={refreshInventory}>
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Inventory groups */}
-      <div className="inventory-groups">
-        {LOCATIONS.map((location) => (
-          <section key={location} className="inventory-group">
-            <h2 className="inventory-group-header">
-              <span className="inventory-group-icon">{LOCATION_ICONS[location]}</span>
-              {LOCATION_LABELS[location]}
-              <span className="inventory-group-count">
-                {inventory[location].length}
-              </span>
-            </h2>
-            <div className="inventory-group-content glass-surface">
-              {inventory[location].length === 0 ? (
-                <div className="empty-state-inline">
-                  <span className="empty-state-text">
-                    No items in the {location}
-                  </span>
-                </div>
-              ) : (
-                <div className="inventory-list">
-                  {inventory[location].map((item) => (
-                    <InventoryItemRow
-                      key={item.id}
-                      item={item}
-                      isSelectMode={isSelectMode}
-                      isSelected={selectedIds.has(item.id)}
-                      onSelect={handleToggleSelect}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
-        ))}
-      </div>
+      {!isLoading && !error && (
+        <div className="inventory-groups">
+          {LOCATIONS.map((location) => (
+            <section key={location} className="inventory-group">
+              <h2 className="inventory-group-header">
+                <span className="inventory-group-icon">{LOCATION_ICONS[location]}</span>
+                {LOCATION_LABELS[location]}
+                <span className="inventory-group-count">
+                  {inventory[location].length}
+                </span>
+              </h2>
+              <div className="inventory-group-content glass-surface">
+                {inventory[location].length === 0 ? (
+                  <div className="empty-state-inline">
+                    <span className="empty-state-text">
+                      No items in the {location}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="inventory-list">
+                    {inventory[location].map((item) => (
+                      <InventoryItemRow
+                        key={item.id}
+                        item={item}
+                        isSelectMode={isSelectMode}
+                        isSelected={selectedIds.has(item.id)}
+                        onSelect={handleToggleSelect}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
 
       {/* FAB */}
       {!isSelectMode && (
@@ -257,8 +313,8 @@ export function InventoryScreen() {
           addMode === 'choose'
             ? 'Add item'
             : addMode === 'manual'
-            ? 'Add manually'
-            : 'Scan barcode'
+              ? 'Add manually'
+              : 'Scan barcode'
         }
       >
         {addMode === 'choose' && (

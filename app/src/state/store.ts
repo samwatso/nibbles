@@ -103,24 +103,6 @@ export function setInventory(items: InventoryItem[]): void {
   setStoredValue(STORAGE_KEYS.INVENTORY, items);
 }
 
-export function addInventoryItem(
-  item: Omit<InventoryItem, 'id' | 'added_at' | 'updated_at'>
-): InventoryItem {
-  const now = new Date().toISOString();
-  const newItem: InventoryItem = {
-    ...item,
-    id: crypto.randomUUID(),
-    added_at: now,
-    updated_at: now,
-  };
-
-  const inventory = getInventory();
-  inventory.push(newItem);
-  setInventory(inventory);
-
-  return newItem;
-}
-
 export function updateInventoryItem(
   id: string,
   updates: Partial<Omit<InventoryItem, 'id' | 'added_at'>>
