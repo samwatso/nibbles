@@ -106,16 +106,29 @@ export async function bulkMarkInventoryItemsOutOfStock(ids: string[]): Promise<v
   });
 }
 
-export type InventoryPatch = Partial<Pick<InventoryItem, "name" | "location" | "category" | "stock_status">>;
+export type InventoryPatch = Partial<
+  Pick<InventoryItem, "name" | "location" | "category" | "stock_status">
+>;
 
-export async function updateInventoryItem(id: string, patch: InventoryPatch): Promise<InventoryItem> {
-  const res = await fetch(`/api/inventory/${encodeURIComponent(id)}`, {
+export async function updateInventoryItem(
+  id: string,
+  patch: InventoryPatch
+): Promise<InventoryItem> {
+  const response = await fetch(`${API_BASE}/inventory/${encodeURIComponent(id)}`, {
     method: "PATCH",
-    headers: { "content-type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
   });
 
-  const data = await res.json();
-  if (!res.ok || data?.ok === false) throw new Error(data?.error || "Failed to update item");
-  return data.item as InventoryItem;
+  if (!response.ok) {
+    throw new Error(`Failed to update item: ${response.status}`);
+  }
+
+  const data: ApiResponse<InventoryItem> = await response.json();
+
+  if (!data.ok || !data.item) {
+    throw new Error(data.error || "Failed to update item");
+  }
+
+  return data.item;
 }

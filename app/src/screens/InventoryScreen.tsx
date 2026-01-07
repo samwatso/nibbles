@@ -4,6 +4,7 @@ import { LOCATION_LABELS, LOCATION_ICONS } from '../types';
 import {
   fetchInventory,
   createInventoryItem,
+  updateInventoryItem,
   bulkDeleteInventoryItems,
   bulkMoveInventoryItems,
   bulkMarkInventoryItemsOutOfStock,
@@ -408,13 +409,26 @@ export function InventoryScreen() {
             }}
             submitLabel="Save changes"
             onSubmit={async (values) => {
-              // call PATCH here (updateInventoryItem)
+              if (!editingItem) return;
+
+              try {
+                await updateInventoryItem(editingItem.id, {
+                  name: values.name,
+                  location: values.location,
+                  category: values.category,
+                  stock_status: values.stock_status,
+                });
+
+                await refreshInventory();
+                closeEditSheet();
+              } catch (err) {
+                alert(err instanceof Error ? err.message : "Failed to update item");
+              }
             }}
             onCancel={closeEditSheet}
           />
         )}
       </BottomSheet>
-
     </div>
   );
 }
